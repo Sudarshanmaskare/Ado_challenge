@@ -1,0 +1,18 @@
+vector<int> subarraySum(int arr[], int n, long long s)
+    {
+        // Your code here
+        int left=0;
+    int right=0;
+    int su=0;
+    while(right<n){
+        su+=arr[right];
+        while(su>s){
+            su-=arr[left];
+            left+=1;}
+        if(su==s)
+            return {left+1,right+1};
+        right+=1;
+    }  
+    return {-1};
+        
+    }
