@@ -1,0 +1,163 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+class node{
+    public:
+    int val;
+    node* left;
+    node* right;
+
+    node(int data){
+        val = data;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+void print(node* root){
+    if(root == nullptr){
+        return;
+    }
+    cout<<root->val<<" ";
+    print(root->left);
+    print(root->right);
+}
+
+void find_parent(node* root, unordered_map<node*,node*>& parent, node* &fire_node, int fire){
+    if(root == nullptr){
+        return;
+    }
+
+    if(root->val == fire){
+        fire_node = root;
+    }
+
+    if(root->left != nullptr){
+        parent[root->left] = root;
+    }
+    if(root->right != nullptr){
+        parent[root->right] = root;
+    }
+
+    find_parent(root->left,parent,fire_node, fire);
+    find_parent(root->right,parent,fire_node, fire);
+}
+
+void allen_town(node* root, vector<int>& w, int fire){
+    unordered_map<node*,node*> parent;
+    node* fire_node;
+    find_parent(root, parent, fire_node, fire);
+    
+    queue<node*> q;
+    unordered_set<node*> visited;
+    unordered_set<int> water(w.begin(),w.end());
+
+    if(water.find(fire) != water.end()){
+        cout<<"Not Possible to Burn Tree"<<endl;
+        return;
+    }
+
+    map<int,set<int>> result;
+
+    q.push(fire_node);
+    int time = 0;
+
+    result[time].insert(fire);
+
+    while(!q.empty()){
+        ++time;
+        // cout<<endl<<time<<" -> ";
+        int size = q.size();
+
+        while(size--){
+            node* cur = q.front();
+            q.pop();
+
+            visited.insert(cur);
+
+            if(parent.count(cur) and (visited.find(parent[cur]) == visited.end()) and (water.find(parent[cur]->val) == water.end())){
+                // cout<<parent[cur]->val<<" ";
+                result[time].insert(parent[cur]->val);
+                q.push(parent[cur]);
+            }
+            if(cur->left!= nullptr and visited.find(cur->left)==visited.end() and (water.find(cur->left->val) == water.end())){
+                q.push(cur->left);
+                // cout<<cur->left->val<<" ";
+                result[time].insert(cur->left->val);
+            }
+            if(cur->right!= nullptr and (visited.find(cur->right)==visited.end()) and (water.find(cur->right->val) == water.end())){
+                q.push(cur->right);
+                // cout<<cur->right->val<<" ";
+                result[time].insert(cur->right->val);
+            }
+        }
+    }
+
+    for(auto p:result){
+        cout<<p.first<<" -> ";
+        for(auto s:p.second){
+            cout<<s<<" ";
+        } cout<<endl;
+    }
+}
+
+node* Build(vector<int> &pre, vector<int> &inorder, int st, int end, unordered_map<int,int>& mp){
+    static int idx = 0;
+    if(st > end){
+        return nullptr;
+    }
+    int cur = pre[idx++];
+    node* tree = new node(cur);
+
+    if(st == end){
+        return tree;
+    }
+    int pos = mp[cur];
+
+    tree->left = Build(pre,inorder,st,pos-1,mp);
+    tree->right = Build(pre,inorder,pos+1,end,mp);
+    return tree;
+}
+
+node* solve(vector<int> &pre, vector<int> &inorder){
+    if(inorder.size() == 1){
+        return (new node(inorder[0]));
+    }
+
+    unordered_map<int,int> mp;
+
+    for(int i=0;i<pre.size();i++){
+        mp[inorder[i]]=i;
+    }
+    node* root = Build(pre, inorder,0,pre.size()-1, mp);
+    return root;
+}
+
+int main(){
+    int n;
+    cin>>n;
+
+    vector<int> pre(n), inorder(n);
+
+    for(int i=0;i<n;i++){
+        cin>>pre[i];
+    }
+    for(int i=0;i<n;i++){
+        cin>>inorder[i];
+    }
+    int m;
+    cin>>m;
+    vector<int> water(m);
+    for(int i=0;i<m;i++){
+        cin>>water[i];
+    }
+    int fire;
+    cin>>fire;
+    
+
+    node* root = solve(pre,inorder);
+    // print(root);
+
+    allen_town(root, water, fire);
+    return 0;
+}
