@@ -1,0 +1,68 @@
+// { Driver Code Starts
+#include <bits/stdc++.h>
+using namespace std;
+
+
+ // } Driver Code Ends
+//User function Template for C++
+
+class Solution {
+  public:
+      int lis1(vector<int> v)
+ {
+     vector<int> lis;
+     if(v.size()==0) return 0;
+     lis.push_back(v[0]);
+     for(int i=1;i<v.size();i++)
+     {
+         if(lis.back()<v[i]) lis.push_back(v[i]);
+         else{
+             int ind=lower_bound(lis.begin(),lis.end(),v[i])-lis.begin();
+             lis[ind]=v[i];
+         }
+     }
+     return lis.size();
+ }
+ 
+    int minInsAndDel(int A[], int B[], int N, int M) {
+        // code here
+      vector<int> v;
+        unordered_set<int> s;
+        
+        for(int i=0;i<M;i++){
+            s.insert(B[i]);
+        }
+        
+        for(int i=0;i<N;i++){
+            if(s.find(A[i])!=s.end()){
+                v.push_back(A[i]); 
+       // Notice, we are pushing common elements of A and B
+            }
+        }
+        
+        int LCS=lis1(v);
+        
+        return N+M-(2*LCS);
+    }
+};
+
+// { Driver Code Starts.
+
+int main() {
+    int t;
+    cin >> t;
+    while (t--) {
+        int N,M;
+        cin>>N>>M;
+        
+        int A[N], B[M];
+        for(int i=0; i<N; i++)
+            cin>>A[i];
+        for(int i=0; i<M; i++)
+            cin>>B[i];
+
+        Solution ob;
+        cout << ob.minInsAndDel(A,B,N,M) << endl;
+    }
+    return 0;
+}  // } Driver Code Ends
